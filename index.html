@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0">
+<title>Faucet Status BALLS</title>
+<script src="https://zimjs.org/cdn/1.3.4/createjs.js"></script>
+<script src="https://zimjs.org/cdn/01/zim_doc.js"></script>
+<script src="https://zimjs.org/cdn/Box2dWeb-2.1.a.3.min.js"></script>
+<script src="https://zimjs.org/cdn/physics_2.1.js"></script>
+<!-- zimjs.com - JavaScript Canvas Framework -->
+<script type=module>
+
+const frame = new Frame(FILL, 1024, 768, light,dark);
+	
+let faucetsWithValue = []
+const colors = [pink,blue,green,yellow,dark,white,orange,purple];
+
+frame.on("ready", () => {
+	let stage = frame.stage;
+	let stageW = frame.width;
+	let stageH = frame.height;
+
+	const physics = new Physics(0, false); // 0 gravity and no borders
+	zog("ready from ZIM Frame"); // logs in console (F12 - choose console)
+	const baseApiUrl = 'https://api.tmwstw.io/'
+	const typesFaucet = ['faucet_state_mid=grease','faucet_state_mid=slag','faucet_state=bob','faucet_state=slag','faucet_state=grease'];
+	let apiType = pluck(typesFaucet)
+	let apiUrl = baseApiUrl+apiType
+	zog('Showing Data for ' +apiType)
+	async(`https://zimjs.org/cdn/jsonp.php?api=${apiUrl}&callback=async.submitData`, submitData);
+
+
+function submitData(data){
+	data.forEach(function(data){
+		if (data[1] === 0)
+			{ zog('0 givers =>' + data[0]) 		
+		} else{ 	
+		faucetsWithValue.push(data[0])
+		} 
+	})
+	drawthis();
+};
+
+const circles = new Container().addTo();
+
+function drawthis(){
+	loop(faucetsWithValue,(faucets,i) => {
+		let r = 50
+		let circle = new Circle(r,pluck(colors))
+		.loc(rand(stageW), rand(stageH),circles)
+		.addPhysics();
+		Circle.damp = new Damp();
+		circle.label = new Label({text:faucetsWithValue[i], size:r*.5, color:red}).centerReg(circle);
+})
+}
+
+physics.Ticker.add(()=>{
+			
+		circles.loop(circle=>{
+
+		circle.force((stageW/2-circle.x)*.1, (stageH/2-circle.y)*.1);
+
+		});
+	});
+
+		physics.drag();
+		
+	
+
+}); // end of ready
+</script>
+</head>
+<body></body>
+</html>
